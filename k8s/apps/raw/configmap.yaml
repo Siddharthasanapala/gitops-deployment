@@ -1,0 +1,11 @@
+# Only genuinely non-secret config lives here. Everything in .env.example that
+# holds a credential (GEMINI_API_KEY, RESEND_API_KEY, SMTP_*, CONTACT_EMAIL,
+# SITE_URL) goes in the Secret instead — see secret.example.yaml and
+# DEPLOYMENT.md §8 for how the real Secret is created (never from this file).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demo-config
+  namespace: demo-raw
+data:
+  NODE_ENV: "production"

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: portfolio
-  namespace: portfolio-kubernetes
+  namespace: portfolio-raw
   labels:
     app: portfolio
 spec:

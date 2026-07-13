@@ -1,0 +1,47 @@
+# Answers "if I add a new folder, does a new Application appear on its own?"
+# — with just application-raw.yaml/application-helm.yaml (kubectl-applied by
+# hand, one at a time), the answer was no: nothing watches argocd/ itself for
+# new files. This ApplicationSet is what actually makes that automatic, for
+# any *new* app going forward, via the Git "directories" generator: it scans
+# k8s/apps/* in this repo and creates/updates/deletes one Application per
+# matching subdirectory — no manual `kubectl apply` per new app.
+#
+# Scoped to a new k8s/apps/<name>/ convention deliberately, not k8s/* — that
+# would also match k8s/raw (already owned by application-raw.yaml) and
+# double-manage it. Each subdirectory here is expected to hold plain
+# Kubernetes YAML (same shape as k8s/raw); a Helm-chart equivalent generator
+# would be a separate ApplicationSet scanning e.g. helm/apps/*.
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: portfolio-apps
+  namespace: argocd
+spec:
+  goTemplate: true
+  goTemplateOptions: ["missingkey=error"]
+  generators:
+    - git:
+        repoURL: https://github.com/Siddharthasanapala/gitops-deployment.git
+        revision: siddhu
+        directories:
+          - path: k8s/apps/*
+  template:
+    metadata:
+      name: "{{.path.basename}}"
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Siddharthasanapala/gitops-deployment.git
+        targetRevision: siddhu
+        path: "{{.path.path}}"
+        directory:
+          exclude: "secret.example.yaml"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{.path.basename}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

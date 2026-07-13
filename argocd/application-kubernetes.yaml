@@ -9,7 +9,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: portfolio-raw
+  name: portfolio-kubernetes
   namespace: argocd
 spec:
   project: default
@@ -21,7 +21,7 @@ spec:
       exclude: "secret.example.yaml"
   destination:
     server: https://kubernetes.default.svc
-    namespace: portfolio-raw
+    namespace: portfolio-kubernetes
   syncPolicy:
     automated:
       prune: true

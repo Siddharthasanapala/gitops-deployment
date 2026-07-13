@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: portfolio-raw
+  name: portfolio-kubernetes
   labels:
     app.kubernetes.io/part-of: portfolio
     deploy-method: raw-yaml

@@ -209,14 +209,28 @@ gitops-deploy/                       (→ becomes its own repo: portfolio-gitops
 │       │   ├── secret.yaml
 │       │   └── hpa.yaml             (optional, disabled by default)
 │       └── .helmignore
-├── argocd/
-│   ├── application-raw.yaml         (Application CR → k8s/raw, ns portfolio-raw)
-│   └── application-helm.yaml        (Application CR → helm/portfolio, ns portfolio-helm)
+└── argocd/
+    ├── application-raw.yaml         (Application CR → k8s/raw, ns portfolio-raw)
+    └── application-helm.yaml        (Application CR → helm/portfolio, ns portfolio-helm)
+```
+
+**Revised during Phase 9:** the Jenkins controller's own image definition
+(`Dockerfile.jenkins`, `plugins.txt`, `init.groovy.d/`) moved to the **app repo**
+(`siddhartha-portfolio/jenkins/`), not here. Rationale: this GitOps repo should
+contain only what ArgoCD actually watches (`k8s/raw/`, `helm/portfolio/`,
+`argocd/`) — the Jenkins controller isn't cluster-desired-state, ArgoCD never
+looks at it, and it's tooling for building/testing the app, so it belongs
+next to the app code and its `Jenkinsfile`:
+
+```
+siddhartha-portfolio/                (app repo)
+├── Jenkinsfile                      (the pipeline Jenkins actually runs — "Pipeline script from SCM"
+│                                      fetches this from here, not from gitops-deployment)
 └── jenkins/
-    ├── Dockerfile.jenkins           (jenkins/jenkins:lts + docker-cli, so pipeline can `docker build`)
-    └── Jenkinsfile                  (lives here for reference; the *real* one Jenkins runs is
-                                       fetched from the APP repo, since that's what "CI checks out
-                                       its own pipeline definition" means in practice — see Phase 8)
+    ├── Dockerfile.jenkins           (jenkins/jenkins:lts + docker-cli, so pipeline stages can `docker build`)
+    ├── plugins.txt                  (git, workflow-aggregator, credentials-binding, docker-workflow)
+    └── init.groovy.d/
+        └── create-admin.groovy      (creates the one admin account from env vars, never hardcoded)
 ```
 
 ---

@@ -1,0 +1,9 @@
+apiVersion: v2
+name: portfolio
+description: >-
+  Siddhartha Sanapala's portfolio app — parametrized Helm equivalent of
+  k8s/raw (DEPLOYMENT.md Phase 3). Same Deployment/Service/Ingress/ConfigMap
+  shape, templated instead of hardcoded.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

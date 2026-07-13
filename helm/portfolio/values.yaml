@@ -1,0 +1,57 @@
+replicaCount: 1
+# lib/rateLimit.ts's in-memory limiter is single-instance-only
+# (DEPLOYMENT.md §7.8) — don't raise this (or enable autoscaling below)
+# without also moving that to a shared store.
+
+image:
+  repository: ghcr.io/siddharthasanapala/siddhartha-portfolio
+  tag: manual-test
+  pullPolicy: IfNotPresent
+
+service:
+  port: 80
+  targetPort: 3000
+
+ingress:
+  enabled: true
+  className: nginx
+  host: portfolio-helm.local
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+probes:
+  path: /api/health
+  port: 3000
+
+# Only genuinely non-secret config. Actual credentials go through `secret`
+# below, never here.
+config:
+  NODE_ENV: production
+
+secret:
+  # Same fast-path approach as k8s/raw (DEPLOYMENT.md §8): the real Secret is
+  # created imperatively, once per namespace, and is never committed:
+  #
+  #   kubectl create secret generic portfolio-secrets -n portfolio-helm \
+  #     --from-env-file=.env
+  #
+  # `create: false` means this chart only *references* that Secret by name —
+  # it never templates one from values.yaml, so there's no way a real
+  # credential ends up committed to this repo through this chart.
+  name: portfolio-secrets
+  create: false
+  data: {}
+
+autoscaling:
+  # Disabled by default — see the replicaCount note above. Only turn this on
+  # after lib/rateLimit.ts has a shared (e.g. Redis-backed) store.
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 80

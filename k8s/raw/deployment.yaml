@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: portfolio
-          image: ghcr.io/siddharthasanapala/siddhartha-portfolio:manual-test
+          image: ghcr.io/siddharthasanapala/siddhartha-portfolio:92813a0
           ports:
             - containerPort: 3000
           envFrom:

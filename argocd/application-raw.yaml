@@ -1,0 +1,30 @@
+# ArgoCD Application for the plain-YAML deployment path (k8s/raw).
+#
+# `directory.exclude` deliberately excludes secret.example.yaml — that file
+# is a shape reference only (placeholder REPLACE_ME values, see its own
+# header comment), not something that should ever be synced/applied. Without
+# this exclude, ArgoCD would apply it as a real Secret named
+# `portfolio-secrets` with placeholder values and, via selfHeal, keep
+# reverting the real imperatively-created Secret back to those placeholders.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: portfolio-raw
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Siddharthasanapala/gitops-deployment.git
+    targetRevision: siddhu
+    path: k8s/raw
+    directory:
+      exclude: "secret.example.yaml"
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: portfolio-raw
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,29 @@
+# ArgoCD Application for the Helm chart deployment path (helm/portfolio).
+#
+# No exclude needed here: templates/secret.yaml is gated by
+# `secret.create: false` in values.yaml (see Chart's own comment), so ArgoCD
+# rendering via `helm template` with default values never produces a Secret
+# object in the first place.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: portfolio-helm
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Siddharthasanapala/gitops-deployment.git
+    targetRevision: siddhu
+    path: helm/portfolio
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: portfolio-helm
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
